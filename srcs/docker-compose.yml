@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    ports:
+      - "443:443" #TLS-enabled port
+    volumes:
+      - ./srcs/nginx/conf.d: /etc/nginx/conf.d:ro
+      - ./srcs/nginx/certificates: /etc/nginx/certificates:ro
+      - /home/jverdu-r/data/wordpress_files: /var/www/html:ro
+    depends on:
+      - wordpress
+    networks:
+      - wp_network
+    loggin:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+  
+  wordpress:
+    image: wordpress: php8.2-fpm
+    container_name: wordpress
+    volumes:
+      - /home/jverdu-r/datawordpress_files: /var/www/html
+    enviroment:
+      WORDPRESS_DBHOST: db
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+    depends_on:
+      - db
+    networks:
+      - wp_network
+    logging:
+      driver: json-file
+      options:
+          max-size: "10m"
+          max-file: "3"
+  
+  db:
+    image: mariadb:10.6
+    container_name: mariadb
+    volumes:
+      - /home/jverdu-r/data/db_data:/var/lib/mysql
+      - ./srcs/db: /docker-entrypoint-initdb.d:ro
+    enviroment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - wp_network
+    loggin:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  wordpress_files:
+    driver: local
+  db_data:
+    driver: local
+
+networks:
+  wp_network:
+    driver: bridge
+
