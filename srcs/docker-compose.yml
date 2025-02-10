@@ -11,9 +11,7 @@ services:
       MYSQL_USER: "${MYSQL_USER}"
       MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
     volumes:
-      - type: bind
-        source: /home/jverdu-r/data/db_data
-        target: /var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
       - my_network
 
@@ -29,9 +27,7 @@ services:
       WORDPRESS_DB_PASSWORD: "${WORDPRESS_DB_PASSWORD}"
       WORDPRESS_DB_NAME: "${WORDPRESS_DB_NAME}"
     volumes:
-      - type: bind
-        source: /home/jverdu-r/data/wp_data
-        target: /var/www/html
+      - wordpress_data:/var/www/html
     networks:
       - my_network
 
@@ -42,12 +38,8 @@ services:
     depends_on:
       - wordpress
     volumes:
-      - type: bind
-        source: /home/jverdu-r/data/nginx_conf
-        target: /etc/nginx/conf.d
-      - type: bind
-        source: /home/jverdu-r/data/wp_data
-        target: /var/www/html
+      - nginx_data:/etc/nginx/conf.d
+      - wordpress_data:/var/www/html
     ports:
       - "443:443"
     networks:
@@ -57,3 +49,24 @@ services:
 networks:
   my_network:
     driver: bridge
+
+volumes:
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "/home/dungeonmaster/Documentos/inception/wp_data"
+  db_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "/home/dungeonmaster/Documentos/inception/db_data"
+  nginx_data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "/home/dungeonmaster/Documentos/inception/nginx_conf"
+
