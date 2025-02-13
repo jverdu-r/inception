@@ -14,14 +14,8 @@ all: up
 
 # Build and start containers
 .PHONY: up
-up: check-env create-dirs
+up: check-env
 	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml up --build -d
-
-# Create required directories if they don't exist
-.PHONY: create-dirs
-create-dirs:
-	@mkdir -p $(DB_DIR) $(WP_DIR) $(NGINX_DIR)
-	@echo "Directories $(DB_DIR), $(WP_DIR), and $(NGINX_DIR) created or already exist."
 
 # Stop containers
 .PHONY: down
