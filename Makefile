@@ -1,5 +1,5 @@
 # Variables
-COMPOSE = docker-compose
+COMPOSE = docker compose
 DOCKER = docker
 SRC_DIR = ./srcs
 ENV_FILE = $(SRC_DIR)/.env

@@ -3,18 +3,16 @@ version: "3.8"
 services:
   init:
     build:
-      context: ./init  # Create an 'init' directory with a Dockerfile inside
-      dockerfile: Dockerfile # Name of the Dockerfile
+      context: ./init
+      dockerfile: Dockerfile
     volumes:
       - type: bind
-        source: /home/dungeonmaster/Documentos/inception  # Mount the parent directory
+        source: /home/dungeonmaster/Documentos/inception
         target: /home/dungeonmaster/Documentos/inception
-    command: /bin/true  # Keep the container running (or use a specific command)
+    command: /bin/true
 
   mariadb:
-    build:
-      context: ./requirements/mariadb
-      dockerfile: Dockerfile
+    image: mariadb:latest
     container_name: mariadb
     restart: always
     environment:
@@ -25,14 +23,15 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - my_network
+      - my-network
     depends_on:
-      - init  # Depend on the init container
+      - init
 
   wordpress:
     build:
       context: ./requirements/wordpress
       dockerfile: Dockerfile
+    image: wordpress-custom  # You can give a name to the image
     container_name: wordpress
     restart: always
     environment:
@@ -44,10 +43,11 @@ services:
       - wordpress_data:/var/www/wordpress
       - wp_files:/var/www/html
     depends_on:
-      - mariadb  # Depend on mariadb (which depends on init)
+      - mariadb
+      - init
     networks:
-      - my_network
-    user: 1000:1000
+      - my-network
+    user: 1000:1000  # Replace 1000 with your actual user ID
 
   nginx:
     build:
@@ -57,49 +57,25 @@ services:
     restart: always
     ports:
       - "443:443"
+      - "80:80"
     volumes:
       - wordpress_data:/var/www/wordpress
       - wp_files:/var/www/html
       - nginx_conf:/etc/nginx/conf.d
-      - ssl_certs:/etc/nginx/ssl
+      - ./srcs/ssl_certs:/etc/nginx/ssl  # Corrected path
     depends_on:
-      - wordpress  # Depend on wordpress (which depends on mariadb, which depends on init)
+      - wordpress
+      - init
     networks:
-      - my_network
+      - my-network
     command: ["nginx", "-g", "daemon off;"]
 
 networks:
-  my_network:
+  my-network:
     driver: bridge
 
 volumes:
-  wordpress_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/home/dungeonmaster/Documentos/inception/wp_data"
-  wp_files:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/home/dungeonmaster/Documentos/inception/wp_files"
   db_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/home/dungeonmaster/Documentos/inception/db_data"
+  wordpress_data:
+  wp_files:
   nginx_conf:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/home/dungeonmaster/Documentos/inception/nginx_conf"
-  ssl_certs:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/home/dungeonmaster/Documentos/inception/ssl_certs"
