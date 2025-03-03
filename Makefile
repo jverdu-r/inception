@@ -1,85 +1,93 @@
-# Variables
 COMPOSE = docker compose
 DOCKER = docker
 SRC_DIR = ./srcs
 ENV_FILE = $(SRC_DIR)/.env
-DATA_DIR = /home/dungeonmaster/Documentos/inception
-DB_DIR = $(DATA_DIR)/db_data
-WP_DIR = $(DATA_DIR)/wp_data
-NGINX_DIR = $(DATA_DIR)/nginx_conf
+PROJECT_NAME := inception
 
-# Default target
 .PHONY: all
 all: up
 
-# Build and start containers
 .PHONY: up
 up: check-env
 	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml up --build -d
-
-# Stop containers
+	
 .PHONY: down
 down:
 	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml down
 
-# Restart containers
+.PHONY:
+stop:
+	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml stop
+
+.PHONY:
+start:
+	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml start
+
 .PHONY: restart
 restart: down up
 
-# Clean up volumes and rebuild everything
 .PHONY: clean
-clean: down
-	rm -rf $(DB_DIR) $(WP_DIR) $(NGINX_DIR)
-	$(DOCKER) volume prune -f
-	$(DOCKER) system prune -af --volumes
-	@echo "All Docker data removed."
+clean:
+	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml down
+	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml rm -f
+	docker image prune -a -f
+	docker volume prune -f  # Still important for other volume types
+	sudo rm -rf certs/nginx.crt certs/nginx.key # Remove certificates
+	sudo rm -rf wordpress_data/* # Clear wordpress data
+	sudo rm -rf mariadb_data/*  # Clear mariadb data
 
-# Check if .env file exists
 .PHONY: check-env
 check-env:
 	@if [ ! -f $(ENV_FILE) ]; then echo "Error: .env file missing!" && exit 1; fi
 	@echo "Environment file found."
 
-# Display logs
 .PHONY: logs
 logs:
 	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml logs --tail=50
 
-# Show running containers
 .PHONY: ps
 ps:
 	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml ps
 
-# Connect to the WordPress container
-.PHONY: wp-shell
-wp-shell:
-	$(DOCKER) exec -it wordpress bash
+.PHONY: exec-nginx  # Added exec-nginx
+exec-nginx:
+	docker exec -it srcs-nginx-1 bash
 
-# Connect to the MariaDB container
-.PHONY: db-shell
+.PHONY: exec-wordpress  # Added exec-wordpress
+exec-wordpress:
+	docker exec -it srcs-wordpress-1 bash
+
+.PHONY: exec-mariadb  # Added exec-mariadb
+exec-mariadb:
+	docker exec -it srcs-mariadb-1 bash
+
+.PHONY: wp-shell  # (Alternative way to access WordPress)
+wp-shell:
+	docker exec -it $(PROJECT_NAME)-wordpress-1 bash
+
+.PHONY: db-shell  # (Alternative way to access MariaDB)
 db-shell:
-	$(DOCKER) exec -it mariadb mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD}
+	docker exec -it $(PROJECT_NAME)-mariadb-1 bash mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD}
 	@echo "Connected to the database."
 
-# Give permission to modify and delete the container files
 .PHONY: fix-permissions
 fix-permissions:
-	sudo chown -R $(USER):$(USER) $(DATA_DIR)
-	sudo chmod -R 755 $(DATA_DIR)
+	sudo chown -R $(USER):$(USER) mariadb_data wordpress_data  # Corrected path
+	sudo chmod -R 755 mariadb_data wordpress_data  # Corrected path
 	@echo "Fixed permissions for $(DATA_DIR)"
 
-
-# Run Makefile help
 .PHONY: help
 help:
 	@echo "Available commands:"
-	@echo "  make up              - Start and build the containers."
-	@echo "  make down            - Stop the containers."
-	@echo "  make restart         - Restart the containers."
-	@echo "  make clean           - Remove all volumes and images."
-	@echo "  make logs            - Show recent logs."
-	@echo "  make ps              - Show running containers."
-	@echo "  make wp-shell        - Access the WordPress container."
-	@echo "  make db-shell        - Access the MariaDB shell."
-	@echo "  make fix-permissions -Give permissions to modify containers files"
-
+	@echo "  make up               - Start and build the containers."
+	@echo "  make down             - Stop the containers."
+	@echo "  make restart          - Restart the containers."
+	@echo "  make clean            - Remove all volumes and images."
+	@echo "  make logs             - Show recent logs."
+	@echo "  make ps               - Show running containers."
+	@echo "  make exec-nginx        - Access the Nginx container."
+	@echo "  make exec-wordpress   - Access the WordPress container."
+	@echo "  make exec-mariadb     - Access the MariaDB container."
+	@echo "  make wp-shell         - Access the WordPress container."
+	@echo "  make db-shell         - Access the MariaDB shell."
+	@echo "  make fix-permissions - Give permissions to modify containers files"

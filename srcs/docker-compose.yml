@@ -1,81 +1,69 @@
-version: "3.8"
-
 services:
-  init:
-    build:
-      context: ./init
-      dockerfile: Dockerfile
-    volumes:
-      - type: bind
-        source: /home/dungeonmaster/Documentos/inception
-        target: /home/dungeonmaster/Documentos/inception
-    command: /bin/true
-
   mariadb:
-    image: mariadb:latest
+    build: ./requirements/mariadb/
     container_name: mariadb
-    restart: always
-    environment:
-      MYSQL_DATABASE: "${MYSQL_DATABASE}"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+    env_file: .env
+    healthcheck:
+      test: mariadb -e "SELECT 1;"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+      start_interval: 5s
     volumes:
-      - db_data:/var/lib/mysql
+      - maria_volume:/var/lib/mysql
+    restart: always
     networks:
-      - my-network
-    depends_on:
-      - init
+      - inception
 
   wordpress:
-    build:
-      context: ./requirements/wordpress
-      dockerfile: Dockerfile
-    image: wordpress-custom  # You can give a name to the image
+    build: ./requirements/wordpress/
     container_name: wordpress
-    restart: always
-    environment:
-      WORDPRESS_DB_HOST: "mariadb"
-      WORDPRESS_DB_USER: "${MYSQL_USER}"
-      WORDPRESS_DB_PASSWORD: "${MYSQL_PASSWORD}"
-      WORDPRESS_DB_NAME: "${MYSQL_DATABASE}"
-    volumes:
-      - wordpress_data:/var/www/wordpress
-      - wp_files:/var/www/html
+    env_file: .env
     depends_on:
-      - mariadb
-      - init
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: pgrep php-fpm7.4
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+      start_interval: 5s
+    volumes:
+      - wp_volume:/usr/share/wordpress
+    restart: always
     networks:
-      - my-network
-    user: 1000:1000  # Replace 1000 with your actual user ID
+      - inception
 
   nginx:
-    build:
-      context: ./requirements/nginx
-      dockerfile: Dockerfile
+    build: ./requirements/nginx/
     container_name: nginx
-    restart: always
+    env_file: .env
     ports:
       - "443:443"
-      - "80:80"
-    volumes:
-      - wordpress_data:/var/www/wordpress
-      - wp_files:/var/www/html
-      - nginx_conf:/etc/nginx/conf.d
-      - ./srcs/ssl_certs:/etc/nginx/ssl  # Corrected path
     depends_on:
-      - wordpress
-      - init
+      wordpress:
+        condition: service_healthy
+    volumes:
+      - wp_volume:/usr/share/wordpress
+    restart: always
     networks:
-      - my-network
-    command: ["nginx", "-g", "daemon off;"]
-
-networks:
-  my-network:
-    driver: bridge
+      - inception
 
 volumes:
-  db_data:
-  wordpress_data:
-  wp_files:
-  nginx_conf:
+  maria_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/dungeonmaster/Documentos/inception3/srcs/data/maria
+  wp_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/dungeonmaster/Documentos/inception3/srcs/data/wp
+
+networks:
+  inception:

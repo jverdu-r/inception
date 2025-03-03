@@ -1,9 +1,11 @@
-FROM nginx:stable-alpine
+FROM debian:bullseye-20240612
 
-COPY conf/default.conf /etc/nginx/conf.d/default.conf
-COPY certificates/cert.pem /etc/nginx/ssl/cert.pem
-COPY certificates/key.pem /etc/nginx/ssl/key.pem
+RUN apt update && apt install -y nginx openssl
 
-EXPOSE 443
+RUN mkdir /keys && \
+	openssl req -nodes -x509 -newkey rsa:4096 -days 3650 -sha256 \
+	-keyout /keys/cert-key.pem -out /keys/cert.pem -subj "/"
 
-CMD ["nginx", "-g", "daemon off;"]
+COPY $PWD/tools /tools
+
+CMD nginx -c /tools/nginx.conf
