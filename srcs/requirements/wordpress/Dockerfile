@@ -14,12 +14,12 @@ COPY $PWD/tools/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 COPY $PWD/tools /tools
 
 # Explicitly specify the download path
-RUN /usr/bin/wp-cli.phar core download --allow-root --path=/usr/share/wordpress/
+#RUN /usr/bin/wp-cli.phar core download --allow-root --path=/usr/share/wordpress/
 
-RUN ls -l /usr/share/wordpress/
+#RUN ls -l /usr/share/wordpress/
 
-RUN chown -R www-data:www-data /usr/share/wordpress/
+#RUN chown -R www-data:www-data /usr/share/wordpress/
 
-RUN chmod -R 755 /usr/share/wordpress/
+#RUN chmod -R 755 /usr/share/wordpress/
 
 CMD bash /tools/script.sh

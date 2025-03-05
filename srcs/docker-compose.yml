@@ -57,13 +57,13 @@ volumes:
     driver_opts:
       o: bind
       type: none
-      device: /home/dungeonmaster/Documentos/inception3/srcs/data/maria
+      device: /home/dungeonmaster/Documentos/inception/srcs/data/maria
   wp_volume:
     driver: local
     driver_opts:
       o: bind
       type: none
-      device: /home/dungeonmaster/Documentos/inception3/srcs/data/wp
+      device: /home/dungeonmaster/Documentos/inception/srcs/data/wp
 
 networks:
   inception:
