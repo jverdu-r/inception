@@ -96,6 +96,7 @@ define( 'WP_DEBUG', true );
 
 define('WP_SITEURL', 'https://jverdu-r.42.fr');
 define('WP_HOME', 'https://jverdu-r.42.fr');
+define('FORCE_SSL_ADMIN',true);
 
 /** Absolute path to the WordPress directory. */
 if ( ! defined( 'ABSPATH' ) ) {
