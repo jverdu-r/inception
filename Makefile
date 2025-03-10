@@ -33,7 +33,6 @@ clean:
 	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml rm -f
 	docker image prune -a -f
 	docker volume prune -f
-	#sudo rm -rf certs/nginx.crt certs/nginx.key
 	sudo rm -rf $(DATA_DIR)/maria/* # Remove maria data contents
 	sudo rm -rf $(DATA_DIR)/wp/* # Remove wp data contents
 	rmdir $(DATA_DIR)/maria 2>/dev/null || true # Remove maria directory if empty
@@ -87,7 +86,7 @@ help:
 	@echo "  make exec-mariadb     - Access the MariaDB container."
 	@echo "  make wp-shell         - Access the WordPress container."
 	@echo "  make db-shell         - Access the MariaDB shell."
-	@echo "  make fix-permissions  - Give permissions to modify containers files"
+
 
 .PHONY: create-data-dirs
 create-data-dirs:
