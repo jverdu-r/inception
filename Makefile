@@ -53,24 +53,15 @@ ps:
 
 .PHONY: exec-nginx
 exec-nginx:
-	docker exec -it srcs-nginx-1 bash
+	docker exec -it nginx bash
 
 .PHONY: exec-wordpress
 exec-wordpress:
-	docker exec -it srcs-wordpress-1 bash
+	docker exec -it wordpress bash
 
 .PHONY: exec-mariadb
 exec-mariadb:
-	docker exec -it srcs-mariadb-1 bash
-
-.PHONY: wp-shell
-wp-shell:
-	docker exec -it $(PROJECT_NAME)-wordpress-1 bash
-
-.PHONY: db-shell
-db-shell:
-	docker exec -it $(PROJECT_NAME)-mariadb-1 bash mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD}
-	@echo "Connected to the database."
+	docker exec -it mariadb bash
 
 .PHONY: help
 help:
@@ -84,8 +75,6 @@ help:
 	@echo "  make exec-nginx       - Access the Nginx container."
 	@echo "  make exec-wordpress   - Access the WordPress container."
 	@echo "  make exec-mariadb     - Access the MariaDB container."
-	@echo "  make wp-shell         - Access the WordPress container."
-	@echo "  make db-shell         - Access the MariaDB shell."
 
 
 .PHONY: create-data-dirs
