@@ -3,7 +3,7 @@ DOCKER = docker
 SRC_DIR = ./srcs
 ENV_FILE = $(SRC_DIR)/.env
 PROJECT_NAME := inception
-DATA_DIR = $(SRC_DIR)/data
+DATA_DIR = /home/jverdu-r/data
 
 .PHONY: all
 all: up
