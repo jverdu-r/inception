@@ -4,7 +4,7 @@ services:
     container_name: mariadb
     env_file: .env
     healthcheck:
-      test: mariadb -e "SELECT 1;"
+      test: ["CMD", "mysqladmin", "-u", "root", "-p$(cat /run/secrets/DB1_MASTER_PWD)", "ping", "-h", "localhost", "-P", "3306"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -13,6 +13,19 @@ services:
     volumes:
       - maria_volume:/var/lib/mysql
     restart: always
+    secrets:
+      - DB1_MASTER_PWD
+      - DB1_USER
+      - DB1_PWD
+      - DB1_NAME
+    environment:
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/DB1_MASTER_PWD
+      MARIADB_USER_FILE: /run/secrets/DB1_USER
+      MARIADB_PASSWORD_FILE: /run/secrets/DB1_PWD
+      MARIADB_DATABASE: gungeon
+
+    ports:
+      - "3306:3306"
     networks:
       - inception
 
@@ -33,6 +46,30 @@ services:
     volumes:
       - wp_volume:/usr/share/wordpress
     restart: always
+    secrets:
+      - DB1_MASTER_PWD
+      - DB1_USER
+      - DB1_PWD
+      - DB1_NAME
+      - WP_MASTER_USER
+      - WP_MASTER_PWD
+      - WP_MASTER_EMAIL
+      - WP_USER
+      - WP_PWD
+      - WP_EMAIL
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_USER_FILE: /run/secrets/DB1_USER
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/DB1_PWD
+      WORDPRESS_DB_NAME: /run/secrets/Db1_NAME # DB_NAME should be okay if consistent
+      WORDPRESS_TABLE_PREFIX: wp_
+      WP_MASTER_USER_FILE: /run/secrets/WP_MASTER_USER
+      WP_MASTER_PWD_FILE: /run/secrets/WP_MASTER_PWD
+      WP_MASTER_EMAIL_FILE: /run/secrets/WP_MASTER_EMAIL
+      WP_USR_FILE: /run/secrets/WP_USER
+      WP_PWD_FILE: /run/secrets/WP_PWD
+      WP_EMAIL_FILE: /run/secrets/WP_EMAIL
+      DB1_MASTER_PWD_FILE: /run/secrets/DB1_MASTER_PWD
     networks:
       - inception
 
@@ -67,3 +104,25 @@ volumes:
 
 networks:
   inception:
+
+secrets:
+  DB1_MASTER_PWD:
+    file: ../secrets/DB1_MASTER_PWD.txt
+  DB1_USER:
+    file: ../secrets/DB1_USER.txt
+  DB1_PWD:
+    file: ../secrets/DB1_PWD.txt
+  DB1_NAME:
+    file: ../secrets/DB1_NAME.txt
+  WP_MASTER_USER:
+    file: ../secrets/WP_MASTER_USER.txt
+  WP_MASTER_PWD:
+    file: ../secrets/WP_MASTER_PWD.txt
+  WP_MASTER_EMAIL:
+    file: ../secrets/WP_MASTER_EMAIL.txt
+  WP_USER:
+    file: ../secrets/WP_USER.txt
+  WP_PWD:
+    file: ../secrets/WP_PWD.txt
+  WP_EMAIL:
+    file: ../secrets/WP_EMAIL.txt

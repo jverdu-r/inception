@@ -4,7 +4,7 @@ RUN apt update && apt install -y nginx openssl
 
 RUN mkdir /keys && \
 	openssl req -nodes -x509 -newkey rsa:4096 -days 3650 -sha256 \
-	-keyout /keys/cert-key.pem -out /keys/cert.pem -subj "/"
+	-keyout /etc/ssl/certs/cert-key.pem -out /etc/ssl/certs/cert.pem -subj "/"
 
 COPY $PWD/tools /tools
 
