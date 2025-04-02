@@ -1,7 +1,6 @@
 COMPOSE = docker compose
 DOCKER = docker
 SRC_DIR = ./srcs
-ENV_FILE = $(SRC_DIR)/.env
 PROJECT_NAME := inception
 DATA_DIR = /home/jverdu-r/data
 
@@ -9,7 +8,7 @@ DATA_DIR = /home/jverdu-r/data
 all: up
 
 .PHONY: up
-up: check-env create-data-dirs
+up: create-data-dirs
 	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml up --build -d
 
 .PHONY: down
@@ -38,11 +37,6 @@ clean:
 	rmdir $(DATA_DIR)/maria 2>/dev/null || true # Remove maria directory if empty
 	rmdir $(DATA_DIR)/wp 2>/dev/null || true # Remove wp directory if empty
 
-.PHONY: check-env
-check-env:
-	@if [ ! -f $(ENV_FILE) ]; then echo "Error: .env file missing!" && exit 1; fi
-	@echo "Environment file found."
-
 .PHONY: logs
 logs:
 	$(COMPOSE) -f $(SRC_DIR)/docker-compose.yml logs --tail=50
@@ -66,15 +60,15 @@ exec-mariadb:
 .PHONY: help
 help:
 	@echo "Available commands:"
-	@echo "  make up               - Start and build the containers."
-	@echo "  make down             - Stop the containers."
-	@echo "  make restart          - Restart the containers."
-	@echo "  make clean            - Remove all volumes and images."
-	@echo "  make logs             - Show recent logs."
-	@echo "  make ps               - Show running containers."
-	@echo "  make exec-nginx       - Access the Nginx container."
-	@echo "  make exec-wordpress   - Access the WordPress container."
-	@echo "  make exec-mariadb     - Access the MariaDB container."
+	@echo "  make up               - Start and build the containers."
+	@echo "  make down             - Stop the containers."
+	@echo "  make restart          - Restart the containers."
+	@echo "  make clean            - Remove all volumes and images."
+	@echo "  make logs             - Show recent logs."
+	@echo "  make ps               - Show running containers."
+	@echo "  make exec-nginx       - Access the Nginx container."
+	@echo "  make exec-wordpress   - Access the WordPress container."
+	@echo "  make exec-mariadb     - Access the MariaDB container."
 
 
 .PHONY: create-data-dirs
