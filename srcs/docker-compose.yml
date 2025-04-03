@@ -4,7 +4,7 @@ services:
     container_name: mariadb
     env_file: .env
     healthcheck:
-      test: ["CMD", "mysqladmin", "-u", "root", "-p$(cat /run/secrets/DB1_MASTER_PWD)", "ping", "-h", "localhost", "-P", "3306"]
+      test: ["CMD", "mysqladmin", "-u", "root", "-p${MARIADB_ROOT_PASSWORD}", "ping", "-h", "localhost", "-P", "3306"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -22,6 +22,7 @@ services:
       MARIADB_ROOT_PASSWORD_FILE: /run/secrets/DB1_MASTER_PWD
       MARIADB_USER_FILE: /run/secrets/DB1_USER
       MARIADB_PASSWORD_FILE: /run/secrets/DB1_PWD
+      MARIADB_ROOT_PASSWORD: ${DB1_MASTER_PWD}  
       MARIADB_DATABASE: gungeon
 
     ports:
