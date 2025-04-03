@@ -58,6 +58,7 @@ services:
       - WP_PWD
       - WP_EMAIL
     environment:
+      DB_HOST: mariadb
       WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_USER_FILE: /run/secrets/DB1_USER
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/DB1_PWD
